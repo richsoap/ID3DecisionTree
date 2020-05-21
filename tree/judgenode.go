@@ -106,7 +106,7 @@ func (j *JudgeNode) GetUID() string {
 }
 
 func (j *JudgeNode) Serialize() string {
-	result := j.ToString()
+	result := j.ToString() + "\n"
 	for i := range j.Children {
 		result += j.Children[i].Serialize()
 	}

@@ -1,22 +1,20 @@
 package builder
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/richsoap/ID3Tree/adapter"
+	"github.com/richsoap/ID3Tree/tree"
 )
 
 func TestBuild(t *testing.T) {
-	data := make([]*adapter.Adapter, 0)
-	for i := 0; i < 5; i++ {
-		a := adapter.MakeAdapter()
-		a.Add("Key", fmt.Sprintf("%v", i))
-		a.Add("SubKey", fmt.Sprintf("%v", i%2))
-		data = append(data, a)
-		t.Logf("data[%v]: %v", i, a.ToString())
+	source := adapter.GetExampleAdapterSlice()
+	targetTree := tree.GetExampleTree()
+	b := MakeBuilder()
+	buildTree := b.BuildTree(source)
+	if !tree.CompareTree(targetTree, buildTree) {
+		t.Error("target is different")
+		t.Errorf("target:\n%v", targetTree.Serialize())
+		t.Errorf("build:\n%v", buildTree.Serialize())
 	}
-	a := adapter.MakeAdapter()
-	a.Add("Key", "0")
-	a.Add("SubKey", "1")
 }

@@ -83,6 +83,11 @@ func GetExampleAdapterSlice() []*Adapter {
 		data = append(data, a)
 	}
 	data[len(data)-1].Data["Target"] = "s0"
+	a := MakeAdapter("Target")
+	a.Add("Key", "4")
+	a.Add("SubKey", "1")
+	a.Add("Target", "s1")
+	data = append(data, a)
 	return data
 }
 

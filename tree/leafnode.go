@@ -58,5 +58,5 @@ func (l *LeafNode) GetUID() string {
 }
 
 func (l *LeafNode) Serialize() string {
-	return l.ToString()
+	return l.ToString() + "\n"
 }
