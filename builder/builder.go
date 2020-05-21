@@ -19,11 +19,6 @@ type ScoreEntry struct {
 	Score float64
 }
 
-type NodeEntry struct {
-	Value string
-	Node  tree.Node
-}
-
 func MakeBuilder() TreeBuilder {
 	var b TreeBuilder
 	b.MaxDepth = -1
@@ -83,7 +78,7 @@ func (b *TreeBuilder) BuildTree(data []*adapter.Adapter, depth ...int) tree.Node
 	}
 	node := tree.MakeJudgeNode(bestScore.Key)
 	group := utils.GroupBy(data, bestScore.Key)
-	nodeChan := make(chan NodeEntry)
+	nodeChan := make(chan tree.NodeEntry)
 	defer close(nodeChan)
 	for key := range group {
 		go b.BuildTreeRoutine(group[key], key, currDep+1, nodeChan)
@@ -103,8 +98,8 @@ func (b *TreeBuilder) ScoreRoutine(data []*adapter.Adapter, key string, resChan 
 	resChan <- ScoreEntry{key, score}
 }
 
-func (b *TreeBuilder) BuildTreeRoutine(data []*adapter.Adapter, key string, depth int, resChan chan NodeEntry) {
-	resChan <- NodeEntry{key, b.BuildTree(data, depth)}
+func (b *TreeBuilder) BuildTreeRoutine(data []*adapter.Adapter, key string, depth int, resChan chan tree.NodeEntry) {
+	resChan <- tree.NodeEntry{key, b.BuildTree(data, depth)}
 }
 
 // Called by BuildTree func, to build a leafnode with majority

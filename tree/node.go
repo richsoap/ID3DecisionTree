@@ -19,12 +19,18 @@ type Node interface {
 	AddNode(key string, node Node) error
 	ToString() string
 	Serialize() string
+	Optimize(data ...*adapter.Adapter) Node
 	GetUID() string
 }
 
 type ResultEntry struct {
 	Data   *adapter.Adapter
 	Result string
+}
+
+type NodeEntry struct {
+	Value string
+	Node  Node
 }
 
 func IterateSubTree(subTree Node, data []*adapter.Adapter, resChan chan ResultEntry) {

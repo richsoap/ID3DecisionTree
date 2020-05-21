@@ -112,3 +112,39 @@ func (j *JudgeNode) Serialize() string {
 	}
 	return result
 }
+
+func (j *JudgeNode) Optimize(data ...*adapter.Adapter) Node {
+	if len(data) == 0 {
+		return j
+	}
+	// Optimize subtree
+	resChan := make(chan NodeEntry)
+	defer close(resChan)
+	group := utils.GroupBy(data, j.Key)
+	for key := range j.Children {
+		subSet, existed := group[key]
+		if !existed {
+			subSet = make([]*adapter.Adapter, 0, 0)
+		}
+
+		go func(n Node, data []*adapter.Adapter, key string, resChan chan NodeEntry) {
+			resChan <- NodeEntry{key, n.Optimize(data...)}
+		}(j.Children[key], subSet, key, resChan)
+	}
+	for i := 0; i < len(j.Children); i++ {
+		res, ok := <-resChan
+		if !ok {
+			log.Fatal("chan is closed")
+		}
+		j.Children[res.Value] = res.Node
+	}
+	// Optimize itself
+	childError := j.ErrorNum(data...)
+	newKey, newMatch := utils.GetMajority(data, data[0].Class)
+	newError := len(data) - newMatch
+	if newError <= childError {
+		return MakeLeafNode(newKey)
+	} else {
+		return j
+	}
+}

@@ -60,3 +60,7 @@ func (l *LeafNode) GetUID() string {
 func (l *LeafNode) Serialize() string {
 	return l.ToString() + "\n"
 }
+
+func (l *LeafNode) Optimize(data ...*adapter.Adapter) Node {
+	return l
+}
