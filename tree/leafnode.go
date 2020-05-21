@@ -49,10 +49,14 @@ func (l *LeafNode) AddNode(key string, node Node) error {
 
 func (l *LeafNode) ToString() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%v leafnode %v ", l.Base.UID, l.Result))
+	sb.WriteString(fmt.Sprintf("%v,leafnode,%v ", l.Base.UID, l.Result))
 	return sb.String()
 }
 
-func (l *LeafNode) GetUID() int64 {
+func (l *LeafNode) GetUID() string {
 	return l.Base.GetUID()
+}
+
+func (l *LeafNode) Serialize() string {
+	return l.ToString()
 }

@@ -1,0 +1,8 @@
+0,judgenode,Key,0:1,1:2,2:3,3:4,4:5
+1,leafnode,0
+2,leafnode,1
+3,leafnode,2
+4,leafnode,3
+5,judgenode,SubKey,0:6,1:7
+6,leafnode,s0
+7,leafnode,s1

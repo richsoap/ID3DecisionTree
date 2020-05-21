@@ -1,6 +1,10 @@
 package adapter
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
 
 type Adapter struct {
 	Name    string
@@ -11,11 +15,18 @@ type Adapter struct {
 
 type void struct{}
 
-func MakeAdapter() *Adapter {
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+func MakeAdapter(classname ...string) *Adapter {
 	var res Adapter
-	res.Name = ""
+	res.Name = fmt.Sprintf("%v", rand.Int31())
 	res.Data = make(map[string]string)
 	res.Class = ""
+	if len(classname) > 0 {
+		res.Class = classname[0]
+	}
 	res.UsedKey = make(map[string]void)
 	return &res
 }
@@ -60,4 +71,48 @@ func (a *Adapter) GetUnusedKeys() []string {
 
 func (a *Adapter) ToString() string {
 	return fmt.Sprintf("%v", a.Data)
+}
+
+func GetExampleAdapterSlice() []*Adapter {
+	data := make([]*Adapter, 0)
+	for i := 0; i < 5; i++ {
+		a := MakeAdapter("Target")
+		a.Add("Key", fmt.Sprintf("%v", i))
+		a.Add("SubKey", fmt.Sprintf("%v", i%2))
+		a.Add("Target", fmt.Sprintf("%v", i))
+		data = append(data, a)
+	}
+	data[len(data)-1].Data["Target"] = "s0"
+	return data
+}
+
+func CompareAdapter(a, b *Adapter) bool {
+	if len(a.Data) != len(b.Data) {
+		return false
+	}
+	if a.Class != b.Class {
+		return false
+	}
+	for key := range a.Data {
+		if bval, existed := b.Data[key]; existed {
+			if bval != a.Data[key] {
+				return false
+			}
+		} else {
+			return false
+		}
+	}
+	return true
+}
+
+func CompareAdapterSlice(a, b []*Adapter) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if !CompareAdapter(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
 }

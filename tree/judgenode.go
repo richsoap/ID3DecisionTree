@@ -94,13 +94,21 @@ func (j *JudgeNode) AddNode(key string, node Node) error {
 
 func (j *JudgeNode) ToString() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%v judgenode %v ", j.Base.UID, j.Key))
+	sb.WriteString(fmt.Sprintf("%v,judgenode,%v ", j.Base.UID, j.Key))
 	for key := range j.Children {
-		sb.WriteString(fmt.Sprintf("%v:%v ", key, j.Children[key].GetUID()))
+		sb.WriteString(fmt.Sprintf(",%v:%v", key, j.Children[key].GetUID()))
 	}
 	return sb.String()
 }
 
-func (j *JudgeNode) GetUID() int64 {
+func (j *JudgeNode) GetUID() string {
 	return j.Base.GetUID()
+}
+
+func (j *JudgeNode) Serialize() string {
+	result := j.ToString()
+	for i := range j.Children {
+		result += j.Children[i].Serialize()
+	}
+	return result
 }

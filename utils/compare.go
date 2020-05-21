@@ -1,6 +1,6 @@
 package utils
 
-func ComapreStringSlice(a, b []string) bool {
+func CompareStringSlice(a, b []string) bool {
 	if len(a) != len(b) {
 		return false
 	}
