@@ -41,7 +41,9 @@ func main() {
 	if *optimize != "" {
 		dataset, err := loader.LoaderData(*optimize)
 		utils.CheckError(err)
+		log.Printf("Before Optimization: Error Rate: %v", decisionTree.ErrorRate(dataset...))
 		decisionTree.Optimize(dataset...)
+		log.Printf("After Optimization: Error Rate: %v", decisionTree.ErrorRate(dataset...))
 	}
 	if *save != "" {
 		saver.SaveMode(decisionTree, *save)
@@ -50,7 +52,7 @@ func main() {
 		dataset, err := loader.LoaderData(*run)
 		utils.CheckError(err)
 		result := decisionTree.Judge(dataset...)
-		fmt.Sprintf("decision result: %v", result)
+		fmt.Sprintf("decision result Error Rate: %v\n%v", decisionTree.ErrorRate(dataset...), result)
 		if *output != "" {
 			saver.SaveResult(result, *output)
 		}
@@ -72,7 +74,9 @@ func BuildTreeFromDataset() tree.Node {
 	} else {
 		log.Fatalf("ScoreFunc should be IG or IGR")
 	}
-	return b.BuildTree(dataset)
+	decisionTree := b.BuildTree(dataset)
+	log.Printf("Train DataSet Error Rate: %v", decisionTree.ErrorRate(dataset...))
+	return decisionTree
 }
 
 func LoadTreeFromFile() tree.Node {
