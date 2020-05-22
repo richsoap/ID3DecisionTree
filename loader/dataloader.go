@@ -10,7 +10,7 @@ import (
 )
 
 // first rows is filedesc,
-// colname1:class,colname2,colname3:id ...
+// colname1:class colname2 colname3:id ...
 // data1 data2 data3 ...
 func LoaderData(datapath string) ([]*adapter.Adapter, error) {
 	modeFile, err := os.Open(datapath)
@@ -29,7 +29,7 @@ func LoaderData(datapath string) ([]*adapter.Adapter, error) {
 	result := make([]*adapter.Adapter, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
-		cols := strings.Split(line, ",")
+		cols := strings.Split(line, " ")
 		for i := range cols {
 			cols[i] = strings.Trim(cols[i], " ")
 		}

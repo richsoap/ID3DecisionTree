@@ -103,3 +103,9 @@ func Rem(data []*adapter.Adapter, key string) float64 {
 	}
 	return result
 }
+
+func CheckError(err error) {
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+}

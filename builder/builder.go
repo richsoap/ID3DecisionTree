@@ -99,7 +99,10 @@ func (b *TreeBuilder) ScoreRoutine(data []*adapter.Adapter, key string, resChan 
 }
 
 func (b *TreeBuilder) BuildTreeRoutine(data []*adapter.Adapter, key string, depth int, resChan chan tree.NodeEntry) {
-	resChan <- tree.NodeEntry{key, b.BuildTree(data, depth)}
+	var res tree.NodeEntry
+	res.Value = key
+	res.Node = b.BuildTree(data, depth)
+	resChan <- res
 }
 
 // Called by BuildTree func, to build a leafnode with majority

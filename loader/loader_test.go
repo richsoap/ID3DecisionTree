@@ -8,7 +8,7 @@ import (
 )
 
 func TestLoadData(t *testing.T) {
-	filePath := "../data/example.data"
+	filePath := "../data/example/example.data"
 	readData, err := LoaderData(filePath)
 	if err != nil {
 		t.Fatalf("%v", err)
@@ -24,7 +24,7 @@ func TestLoadData(t *testing.T) {
 }
 
 func TestLoadModel(t *testing.T) {
-	filePath := "../data/example.model"
+	filePath := "../data/example/example.model"
 	readData, err := LoadeModel(filePath)
 	if err != nil {
 		t.Fatalf("%v", err)
