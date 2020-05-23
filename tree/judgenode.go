@@ -68,7 +68,7 @@ func (j *JudgeNode) IsMatched(data *adapter.Adapter) bool {
 	return false
 }
 
-func (j *JudgeNode) ErrorNum(data ...*adapter.Adapter) int {
+func (j *JudgeNode) ErrorNum(data []*adapter.Adapter) int {
 	judgeRes := j.Judge(data...)
 	result := 0
 	for i := range data {
@@ -79,8 +79,8 @@ func (j *JudgeNode) ErrorNum(data ...*adapter.Adapter) int {
 	return result
 }
 
-func (j *JudgeNode) ErrorRate(data ...*adapter.Adapter) float64 {
-	errorNum := j.ErrorNum(data...)
+func (j *JudgeNode) ErrorRate(data []*adapter.Adapter) float64 {
+	errorNum := j.ErrorNum(data)
 	return float64(errorNum) / float64(len(data))
 }
 
@@ -113,7 +113,7 @@ func (j *JudgeNode) Serialize() string {
 	return result
 }
 
-func (j *JudgeNode) Optimize(data ...*adapter.Adapter) Node {
+func (j *JudgeNode) Optimize(data []*adapter.Adapter) Node {
 	if len(data) == 0 {
 		return j
 	}
@@ -128,7 +128,7 @@ func (j *JudgeNode) Optimize(data ...*adapter.Adapter) Node {
 		}
 
 		go func(n Node, data []*adapter.Adapter, key string, resChan chan NodeEntry) {
-			resChan <- NodeEntry{key, n.Optimize(data...)}
+			resChan <- NodeEntry{key, n.Optimize(data)}
 		}(j.Children[key], subSet, key, resChan)
 	}
 	for i := 0; i < len(j.Children); i++ {
@@ -139,7 +139,7 @@ func (j *JudgeNode) Optimize(data ...*adapter.Adapter) Node {
 		j.Children[res.Value] = res.Node
 	}
 	// Optimize itself
-	childError := j.ErrorNum(data...)
+	childError := j.ErrorNum(data)
 	newKey, newMatch := utils.GetMajority(data, data[0].Class)
 	newError := len(data) - newMatch
 	if newError <= childError {

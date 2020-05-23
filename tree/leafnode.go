@@ -29,7 +29,7 @@ func (l *LeafNode) Judge(data ...*adapter.Adapter) []string {
 	return result
 }
 
-func (l *LeafNode) ErrorNum(data ...*adapter.Adapter) int {
+func (l *LeafNode) ErrorNum(data []*adapter.Adapter) int {
 	result := 0
 	for i := range data {
 		if l.Result != data[i].Data[data[i].Class] {
@@ -39,8 +39,8 @@ func (l *LeafNode) ErrorNum(data ...*adapter.Adapter) int {
 	return result
 }
 
-func (l *LeafNode) ErrorRate(data ...*adapter.Adapter) float64 {
-	return float64(l.ErrorNum()) / float64(len(data))
+func (l *LeafNode) ErrorRate(data []*adapter.Adapter) float64 {
+	return float64(l.ErrorNum(data)) / float64(len(data))
 }
 
 func (l *LeafNode) AddNode(key string, node Node) error {
@@ -61,6 +61,6 @@ func (l *LeafNode) Serialize() string {
 	return l.ToString() + "\n"
 }
 
-func (l *LeafNode) Optimize(data ...*adapter.Adapter) Node {
+func (l *LeafNode) Optimize(data []*adapter.Adapter) Node {
 	return l
 }

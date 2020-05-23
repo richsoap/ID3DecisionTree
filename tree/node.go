@@ -14,12 +14,12 @@ const (
 type Node interface {
 	JudgeOne(data *adapter.Adapter) string
 	Judge(data ...*adapter.Adapter) []string
-	ErrorNum(data ...*adapter.Adapter) int
-	ErrorRate(data ...*adapter.Adapter) float64
+	ErrorNum(data []*adapter.Adapter) int
+	ErrorRate(data []*adapter.Adapter) float64
 	AddNode(key string, node Node) error
 	ToString() string
 	Serialize() string
-	Optimize(data ...*adapter.Adapter) Node
+	Optimize(data []*adapter.Adapter) Node
 	GetUID() string
 }
 

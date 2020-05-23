@@ -20,4 +20,7 @@ func TestJudge(t *testing.T) {
 	if !utils.CompareStringSlice(result, target) {
 		t.Errorf("judge error want %v, get %v", target, result)
 	}
+	if tree.ErrorNum(data) == 0 {
+
+	}
 }

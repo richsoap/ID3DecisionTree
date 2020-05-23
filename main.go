@@ -22,6 +22,8 @@ var (
 	scoreFunc = flag.String("func", "IG", "use IG or IGR as scoreFunc")
 	depth     = flag.Int("depth", -1, "Max depth for precut")
 	minNode   = flag.Int("min", -1, "The min number of data pieces, for pre cut")
+	dot       = flag.String("dot", "", "Save model as DotFile")
+	withUID   = flag.Bool("withUID", false, "Print UID in DotFile")
 )
 
 func main() {
@@ -30,7 +32,7 @@ func main() {
 		log.Fatal("Build and Load cannot be used at the same time")
 	}
 	if *build == "" && *load == "" {
-		log.Fatal("One of Build and Load should be uesd")
+		log.Fatal("One of Build and Load should be uesd, use -h for help")
 	}
 	var decisionTree tree.Node
 	if *build != "" {
@@ -41,25 +43,31 @@ func main() {
 	if *optimize != "" {
 		dataset, err := loader.LoaderData(*optimize)
 		utils.CheckError(err)
-		log.Printf("Before Optimization: Error Rate: %v", decisionTree.ErrorRate(dataset...))
-		decisionTree.Optimize(dataset...)
-		log.Printf("After Optimization: Error Rate: %v", decisionTree.ErrorRate(dataset...))
+		log.Printf("Before Optimization: Error Rate: %v", decisionTree.ErrorRate(dataset))
+		decisionTree.Optimize(dataset)
+		log.Printf("After Optimization: Error Rate: %v", decisionTree.ErrorRate(dataset))
 	}
 	if *save != "" {
-		saver.SaveMode(decisionTree, *save)
+		saver.SaveModel(decisionTree, *save)
 	}
 	if *run != "" {
+		log.Printf("load run data from %v", *run)
 		dataset, err := loader.LoaderData(*run)
 		utils.CheckError(err)
 		result := decisionTree.Judge(dataset...)
-		fmt.Sprintf("decision result Error Rate: %v\n%v", decisionTree.ErrorRate(dataset...), result)
+		fmt.Printf("decision result Error Rate: %v", decisionTree.ErrorRate(dataset))
 		if *output != "" {
 			saver.SaveResult(result, *output)
 		}
 	}
+	if *dot != "" {
+		log.Printf("Save dot file to %v", *dot)
+		saver.SaveModelAsDotFile(decisionTree, *dot, *withUID)
+	}
 }
 
 func BuildTreeFromDataset() tree.Node {
+	log.Printf("load train data from %v", *build)
 	dataset, err := loader.LoaderData(*build)
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -75,11 +83,12 @@ func BuildTreeFromDataset() tree.Node {
 		log.Fatalf("ScoreFunc should be IG or IGR")
 	}
 	decisionTree := b.BuildTree(dataset)
-	log.Printf("Train DataSet Error Rate: %v", decisionTree.ErrorRate(dataset...))
+	log.Printf("Train DataSet Error Rate: %v", decisionTree.ErrorRate(dataset))
 	return decisionTree
 }
 
 func LoadTreeFromFile() tree.Node {
+	log.Printf("load model from %v", *load)
 	node, err := loader.LoadeModel(*load)
 	if err != nil {
 		log.Fatalf("%v", err)
