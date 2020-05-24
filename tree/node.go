@@ -62,7 +62,7 @@ func CollectResult(resMap *map[*adapter.Adapter]string, resChan chan ResultEntry
 	}
 }
 
-func CompareTree(a, b Node) bool {
+func CompareNode(a, b Node) bool {
 	return ComapreJudgeNode(a, b) || CompareLeafNode(a, b)
 }
 
@@ -80,7 +80,7 @@ func ComapreJudgeNode(ra, rb Node) bool {
 	}
 	for key := range a.Children {
 		if bchild, existed := b.Children[key]; existed {
-			if !CompareTree(a.Children[key], bchild) {
+			if !CompareNode(a.Children[key], bchild) {
 				return false
 			}
 		} else {

@@ -23,14 +23,30 @@ func TestLoadData(t *testing.T) {
 	}
 }
 
-func TestLoadModel(t *testing.T) {
-	filePath := "../data/example/example.model"
-	readData, err := LoadeModel(filePath)
+func TestLoadTree(t *testing.T) {
+	filePath := "../data/example/example.tree"
+	readData, err := LoadTreeFromFile(filePath)
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 	targetData := tree.GetExampleTree()
-	if !tree.CompareTree(readData, targetData) {
+	if !tree.CompareNode(readData, targetData) {
+		t.Error("Load model is different from target")
+		t.Error("read")
+		t.Error(readData.Serialize())
+		t.Error("target")
+		t.Error(targetData.Serialize())
+	}
+}
+
+func TestLoadForest(t *testing.T) {
+	filePath := "../data/example/example.forest"
+	readData, err := LoadForestFromFile(filePath)
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+	targetData := tree.GetExampleForest()
+	if !tree.CompareForest(readData, targetData) {
 		t.Error("Load model is different from target")
 		t.Error("read")
 		t.Error(readData.Serialize())

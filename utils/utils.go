@@ -109,3 +109,15 @@ func CheckError(err error) {
 		log.Fatalf("%v", err)
 	}
 }
+
+func GetMaxKey(data map[string]float64) string {
+	maxKey := ""
+	maxValue := -1.0
+	for key := range data {
+		if data[key] > maxValue {
+			maxKey = key
+			maxValue = data[key]
+		}
+	}
+	return maxKey
+}

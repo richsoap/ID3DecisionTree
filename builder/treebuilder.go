@@ -8,6 +8,7 @@ import (
 	"github.com/richsoap/ID3Tree/utils"
 )
 
+// used for building a single decision tree
 type TreeBuilder struct {
 	MaxDepth  int
 	MinNode   int
@@ -19,12 +20,12 @@ type ScoreEntry struct {
 	Score float64
 }
 
-func MakeBuilder() TreeBuilder {
+func MakeBuilder() *TreeBuilder {
 	var b TreeBuilder
 	b.MaxDepth = -1
 	b.MinNode = -1
 	b.ScoreFunc = utils.IG
-	return b
+	return &b
 }
 
 // Build tree func, depth is used to precut, which is optional

@@ -10,20 +10,11 @@ import (
 	"github.com/richsoap/ID3Tree/tree"
 )
 
-func LoadeModel(datapath string) (tree.Node, error) {
-	modeFile, err := os.Open(datapath)
-	if err != nil {
-		log.Printf("open modelfile %v error: %v", datapath, err)
-		return nil, err
-	}
-	defer modeFile.Close()
-
-	scanner := bufio.NewScanner(modeFile)
+func LoadTreeFromStrings(lines []string) (tree.Node, error) {
 	nodeBuffer := make(map[string]tree.Node)
 	structBuffer := make(map[string]map[string]string)
 	childrenRecord := make(map[string]int)
-	for scanner.Scan() {
-		line := scanner.Text()
+	for _, line := range lines {
 		cols := strings.Split(line, ",")
 		for i := range cols {
 			cols[i] = strings.Trim(cols[i], " ")
@@ -55,8 +46,24 @@ func LoadeModel(datapath string) (tree.Node, error) {
 	if rootUID == "" {
 		return nil, errors.New("Cannot find root")
 	}
-
 	return LinkNodes(rootUID, nodeBuffer, structBuffer), nil
+}
+
+func LoadTreeFromFile(datapath string) (tree.Node, error) {
+	modeFile, err := os.Open(datapath)
+	if err != nil {
+		log.Printf("open modelfile %v error: %v", datapath, err)
+		return nil, err
+	}
+	defer modeFile.Close()
+
+	scanner := bufio.NewScanner(modeFile)
+	lines := make([]string, 0)
+	for scanner.Scan() {
+		line := scanner.Text()
+		lines = append(lines, line)
+	}
+	return LoadTreeFromStrings(lines)
 }
 
 func LinkNodes(uid string, nodeBuffer map[string]tree.Node, structBuffer map[string]map[string]string) tree.Node {

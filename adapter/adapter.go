@@ -73,6 +73,15 @@ func (a *Adapter) ToString() string {
 	return fmt.Sprintf("%v", a.Data)
 }
 
+func (a *Adapter) ResetUsedKey() {
+	a.UsedKey = make(map[string]void)
+}
+
+func (a *Adapter) IsUsedKey(key string) bool {
+	_, existed := a.UsedKey[key]
+	return existed
+}
+
 func GetExampleAdapterSlice() []*Adapter {
 	data := make([]*Adapter, 0)
 	for i := 0; i < 5; i++ {

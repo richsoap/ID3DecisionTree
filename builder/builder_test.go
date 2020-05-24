@@ -12,7 +12,7 @@ func TestBuild(t *testing.T) {
 	targetTree := tree.GetExampleTree()
 	b := MakeBuilder()
 	buildTree := b.BuildTree(source)
-	if !tree.CompareTree(targetTree, buildTree) {
+	if !tree.CompareNode(targetTree, buildTree) {
 		t.Error("target is different")
 		t.Errorf("target:\n%v", targetTree.Serialize())
 		t.Errorf("build:\n%v", buildTree.Serialize())
