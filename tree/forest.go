@@ -117,6 +117,7 @@ func GetExampleForest() *Forest {
 func (f *Forest) Serialize() string {
 	var sb strings.Builder
 	sb.WriteString(f.Type)
+	sb.WriteString("\n")
 	for i := range f.Trees {
 		sb.WriteString(f.Trees[i].Serialize())
 	}

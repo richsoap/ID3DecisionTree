@@ -1,6 +1,7 @@
 package builder
 
 import (
+	"log"
 	"math"
 
 	"github.com/richsoap/ID3Tree/adapter"
@@ -9,14 +10,15 @@ import (
 
 // Use for build a decision forest
 type ForestBuilder struct {
-	Builder *TreeBuilder
-	Type    string
-	Number  int
-	Size    float64
+	Builder  *TreeBuilder
+	Type     string
+	Number   int
+	Size     float64
+	AutoStop bool
 }
 
-func MakeForestBuilder(b *TreeBuilder, t string, num int, size float64) *ForestBuilder {
-	return &ForestBuilder{b, t, num, size}
+func MakeForestBuilder(b *TreeBuilder, t string, num int, size float64, autostop bool) *ForestBuilder {
+	return &ForestBuilder{b, t, num, size, autostop}
 }
 
 func (f *ForestBuilder) BuildForest(data []*adapter.Adapter) *tree.Forest {
@@ -52,6 +54,7 @@ func (f *ForestBuilder) BuildBoosting(data []*adapter.Adapter) *tree.Forest {
 				epsilon += dataProcuder.Weight[i]
 			}
 		}
+		log.Printf("%v iter: epsilon=%v", i+1, epsilon)
 		result.AddTree(t, 0.5*math.Log2((1-epsilon)/epsilon)/math.Log2E)
 		for i := range dataProcuder.Weight {
 			if judgeResult[i] != data[i].Data[class] {
@@ -60,6 +63,10 @@ func (f *ForestBuilder) BuildBoosting(data []*adapter.Adapter) *tree.Forest {
 				dataProcuder.Weight[i] = dataProcuder.Weight[i] / 2 / (1 - epsilon)
 			}
 		}
+		/*if math.Abs(0.5-epsilon) < 0.001 && f.AutoStop {
+			log.Printf("epsilon(%v) is approximately equal to 0.5， stop training", epsilon)
+			break
+		}*/
 	}
 	return result
 }

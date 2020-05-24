@@ -17,7 +17,7 @@ func MakeDataSetProducer(data []*adapter.Adapter) *DataSetProducer {
 	copy(d.Data, data)
 	d.Weight = make([]float64, len(data), len(data))
 	for i := range d.Weight {
-		d.Weight[i] = 1.0
+		d.Weight[i] = 1.0 / float64(len(d.Weight))
 	}
 	return &d
 }

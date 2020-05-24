@@ -29,7 +29,7 @@ func LoaderData(datapath string) ([]*adapter.Adapter, error) {
 	result := make([]*adapter.Adapter, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
-		cols := strings.Split(line, " ")
+		cols := strings.Split(line, ",")
 		for i := range cols {
 			cols[i] = strings.Trim(cols[i], " ")
 		}

@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log"
 
 	"github.com/richsoap/ID3Tree/builder"
@@ -25,8 +24,9 @@ var (
 	dot       = flag.String("dot", "", "Save model as DotFile")
 	withUID   = flag.Bool("withUID", false, "Print UID in DotFile")
 	forest    = flag.String("forest", "single", "Different decision forest type, single, boosting, bagging")
-	trees     = flag.Int("trees", 5, "How many trees in boosting and bagging forest")
+	trees     = flag.Int("trees", 5, "Forest size")
 	setsize   = flag.Float64("setsize", 2.0, "Sample data set size")
+	autostop  = flag.Bool("autostop", true, "Stop boosting train, when epsilon is 0.5")
 )
 
 func main() {
@@ -58,7 +58,7 @@ func main() {
 		dataset, err := loader.LoaderData(*run)
 		utils.CheckError(err)
 		result := decisionForest.Judge(dataset...)
-		fmt.Printf("decision result Error Rate: %v", decisionForest.ErrorRate(dataset))
+		log.Printf("decision result Error Rate: %v", decisionForest.ErrorRate(dataset))
 		if *output != "" {
 			saver.SaveResult(result, *output)
 		}
@@ -89,7 +89,7 @@ func BuildForestFromDataset() *tree.Forest {
 		log.Fatalf("forest should be one of %v/%v/%v", tree.SINGLE_TREE, tree.BAGGING, tree.BOOSTING)
 	}
 
-	f := builder.MakeForestBuilder(b, *forest, *trees, *setsize)
+	f := builder.MakeForestBuilder(b, *forest, *trees, *setsize, *autostop)
 	decisionForest := f.BuildForest(dataset)
 	log.Printf("Train DataSet Error Rate: %v", decisionForest.ErrorRate(dataset))
 	return decisionForest
