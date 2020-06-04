@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/richsoap/ID3Tree/tree"
@@ -21,6 +22,19 @@ func LoadTreeFromStrings(lines []string) (tree.Node, error) {
 		}
 		if cols[1] == "judgenode" {
 			node := tree.MakeJudgeNode(cols[2])
+			node.Base.UID = cols[0]
+			children := make(map[string]string)
+			for i := 3; i < len(cols); i++ {
+				child := strings.Split(cols[i], ":")
+				children[child[0]] = child[1]
+				childrenRecord[child[1]] = 0
+			}
+			nodeBuffer[cols[0]] = node
+			structBuffer[cols[0]] = children
+		} else if cols[1] == "cntnode" {
+			params := strings.Split((cols[2]), ":")
+			val, _ := strconv.ParseFloat(params[1], 64)
+			node := tree.MakeCtnNode(params[0], val)
 			node.Base.UID = cols[0]
 			children := make(map[string]string)
 			for i := 3; i < len(cols); i++ {

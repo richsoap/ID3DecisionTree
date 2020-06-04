@@ -62,7 +62,7 @@ func (j *JudgeNode) Judge(data ...*adapter.Adapter) []string {
 }
 
 func (j *JudgeNode) IsMatched(data *adapter.Adapter) bool {
-	if val, ok := data.Data[j.Key]; ok {
+	if val, ok := data.Data[data.Class]; ok {
 		return j.JudgeOne(data) == val
 	}
 	return false

@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/richsoap/ID3Tree/adapter"
@@ -27,6 +28,7 @@ func LoaderData(datapath string) ([]*adapter.Adapter, error) {
 	nameIndex := -1
 	classname := ""
 	result := make([]*adapter.Adapter, 0)
+	ctnRecord := make(map[int]int)
 	for scanner.Scan() {
 		line := scanner.Text()
 		cols := strings.Split(line, ",")
@@ -46,6 +48,8 @@ func LoaderData(datapath string) ([]*adapter.Adapter, error) {
 						classname = words[0]
 					} else if words[1] == "id" {
 						nameIndex = i
+					} else if words[1] == "ctn" {
+						ctnRecord[i] = 0
 					}
 				}
 				colsNames = append(colsNames, words[0])
@@ -56,6 +60,14 @@ func LoaderData(datapath string) ([]*adapter.Adapter, error) {
 		for i := range cols {
 			if i == nameIndex {
 				a.SetName(cols[i])
+			} else if i == nameIndex {
+				continue
+			} else if _, existed := ctnRecord[i]; existed {
+				val, err := strconv.ParseFloat(cols[i], 64)
+				if err != nil {
+					log.Fatalf("load data: %v", err)
+				}
+				a.AddCtn(colsNames[i], val)
 			} else {
 				a.Add(colsNames[i], cols[i])
 			}

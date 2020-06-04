@@ -20,6 +20,12 @@ type ScoreEntry struct {
 	Score float64
 }
 
+type CtnScoreEntry struct {
+	Key   string
+	Index int
+	Score float64
+}
+
 func MakeBuilder() *TreeBuilder {
 	var b TreeBuilder
 	b.MaxDepth = -1
@@ -64,15 +70,65 @@ func (b *TreeBuilder) BuildTree(data []*adapter.Adapter, depth ...int) tree.Node
 			bestScore = res
 		}
 	}
+	// deciside best continious branch
+	ctnResChan := make(chan CtnScoreEntry)
+	defer close(ctnResChan)
+	ctnRoutineCount := 0
+	ctnBestScore := CtnScoreEntry{"", -1, -10000}
+	sortedRecord := make(map[string][]adapter.AdapterWithOrder)
+	for key := range data[0].CtnData {
+		sortSlice := adapter.MakeAnOrderSlice(data, key)
+		sortedRecord[key] = sortSlice
+		sortData := make([]*adapter.Adapter, len(data), len(data))
+		for index := range sortSlice {
+			sortData[index] = sortSlice[index].Data
+		}
+		prevVal := sortData[0].CtnData[key]
+		for index := range sortData {
+			if sortData[index].CtnData[key] != prevVal {
+				ctnRoutineCount++
+				prevVal = sortData[index].CtnData[key]
+				go b.CtnScoreRoutine(data, key, index, ctnResChan)
+			}
+		}
+	}
+	for i := 0; i < ctnRoutineCount; i++ {
+		res, ok := <-ctnResChan
+		if !ok {
+			log.Fatal("chan was closed")
+		}
+		if res.Score > ctnBestScore.Score {
+			ctnBestScore = res
+		}
+	}
+
 	// There is no avaible key
-	if bestScore.Score == -10000 {
+	if bestScore.Score == -10000 && ctnBestScore.Score == -10000 {
 		return b.BuildLeafNode(data)
 	}
-	for i := range data {
-		data[i].AddUsedKey(bestScore.Key)
+
+	// Chose the best option
+	var node tree.Node
+	var group map[string][]*adapter.Adapter
+	if bestScore.Score > ctnBestScore.Score {
+		for i := range data {
+			data[i].AddUsedKey(bestScore.Key)
+		}
+		node = tree.MakeJudgeNode(bestScore.Key)
+		group = utils.GroupBy(data, bestScore.Key)
+
+	} else {
+		sortSlice := sortedRecord[ctnBestScore.Key]
+		sortData := make([]*adapter.Adapter, len(data), len(data))
+		for index := range sortSlice {
+			sortData[index] = sortSlice[index].Data
+		}
+		midVal := (sortData[ctnBestScore.Index-1].CtnData[ctnBestScore.Key] + sortData[ctnBestScore.Index].CtnData[ctnBestScore.Key]) / 2
+		node = tree.MakeCtnNode(ctnBestScore.Key, midVal)
+		group = make(map[string][]*adapter.Adapter)
+		group["Left"] = sortData[:ctnBestScore.Index]
+		group["right"] = sortData[ctnBestScore.Index:]
 	}
-	node := tree.MakeJudgeNode(bestScore.Key)
-	group := utils.GroupBy(data, bestScore.Key)
 	nodeChan := make(chan tree.NodeEntry)
 	defer close(nodeChan)
 	for key := range group {
@@ -96,6 +152,14 @@ func (b *TreeBuilder) ScoreRoutine(data []*adapter.Adapter, key string, resChan 
 		score := b.ScoreFunc(data, key)
 		resChan <- ScoreEntry{key, score}
 	}
+}
+
+func (b *TreeBuilder) CtnScoreRoutine(data []*adapter.Adapter, key string, index int, resChan chan CtnScoreEntry) {
+	h := utils.H(data, data[0].Class)
+	leftH := utils.H(data[:index], data[0].Class)
+	rightH := utils.H(data[index:], data[0].Class)
+	score := h - (float64(index)*leftH+float64(len(data)-index)*rightH)/float64(len(data))
+	resChan <- CtnScoreEntry{key, index, score}
 }
 
 func (b *TreeBuilder) BuildTreeRoutine(data []*adapter.Adapter, key string, depth int, resChan chan tree.NodeEntry) {
