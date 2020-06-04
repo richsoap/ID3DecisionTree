@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"time"
 
 	"github.com/richsoap/ID3Tree/builder"
 	"github.com/richsoap/ID3Tree/loader"
@@ -19,18 +20,19 @@ var (
 	output    = flag.String("output", "", "Output decicision result to file. Otherwise, stdout")
 	save      = flag.String("save", "", "Save model to file. Otherwise, abort")
 	scoreFunc = flag.String("func", "IG", "Use IG or IGR as scoreFunc")
-	depth     = flag.Int("depth", 3, "Max depth for precut, default is 3")
-	minNode   = flag.Int("min", 3, "The min number of data pieces, for pre cut, default is 3")
+	depth     = flag.Int("depth", -1, "Max depth for precut, default is -1")
+	minNode   = flag.Int("leafsize", 0, "The min number of data pieces, for pre cut, default is 0")
 	dot       = flag.String("dot", "", "Save model as DotFile")
 	withUID   = flag.Bool("withUID", false, "Print UID in DotFile")
 	forest    = flag.String("forest", "single", "Different decision forest type, single, boosting, bagging")
 	trees     = flag.Int("trees", 5, "Forest size")
-	setsize   = flag.Float64("setsize", 2.0, "Sample data set size")
+	setsize   = flag.Float64("setsize", 0.2, "Sample data set size")
 	autostop  = flag.Bool("autostop", true, "Stop boosting train, when epsilon is 0.5")
 )
 
 func main() {
 	flag.Parse()
+	startTS := time.Now().UnixNano()
 	if *build != "" && *load != "" {
 		log.Fatal("Build and Load cannot be used at the same time")
 	}
@@ -67,6 +69,8 @@ func main() {
 		log.Printf("Save dot file to %v", *dot)
 		saver.SaveForestAsDotFile(decisionForest, *dot, *withUID)
 	}
+	endTS := time.Now().UnixNano()
+	log.Printf("use time %v nano second", endTS-startTS)
 }
 
 func BuildForestFromDataset() *tree.Forest {
@@ -88,7 +92,6 @@ func BuildForestFromDataset() *tree.Forest {
 	if *forest != tree.SINGLE_TREE && *forest != tree.BAGGING && *forest != tree.BOOSTING {
 		log.Fatalf("forest should be one of %v/%v/%v", tree.SINGLE_TREE, tree.BAGGING, tree.BOOSTING)
 	}
-
 	f := builder.MakeForestBuilder(b, *forest, *trees, *setsize, *autostop)
 	decisionForest := f.BuildForest(dataset)
 	log.Printf("Train DataSet Error Rate: %v", decisionForest.ErrorRate(dataset))

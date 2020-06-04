@@ -62,6 +62,9 @@ func (a *Adapter) RemoveUsedKey(key string) {
 func (a *Adapter) GetUnusedKeys() []string {
 	res := make([]string, 0)
 	for key := range a.Data {
+		if key == a.Class {
+			continue
+		}
 		if _, existed := a.UsedKey[key]; !existed {
 			res = append(res, key)
 		}

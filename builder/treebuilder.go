@@ -47,25 +47,15 @@ func (b *TreeBuilder) BuildTree(data []*adapter.Adapter, depth ...int) tree.Node
 		return tree.MakeLeafNode(majority)
 	}
 	// decide best bracn
-	tryCount := 0
 	resChan := make(chan ScoreEntry)
 	defer close(resChan)
-	for key := range data[0].Data {
-		if key == data[0].Class { //result should not be used
-			continue
-		}
-		if _, existed := data[0].UsedKey[key]; existed {
-			continue
-		}
-		tryCount++
+	unUsedKey := data[0].GetUnusedKeys()
+	for _, key := range unUsedKey {
 		go b.ScoreRoutine(data, key, resChan)
-	}
-	if tryCount == 0 {
-		return b.BuildLeafNode(data) // All kind has been used
 	}
 	// Get the best score
 	bestScore := ScoreEntry{"", -10000}
-	for i := 0; i < tryCount; i++ {
+	for i := 0; i < len(unUsedKey); i++ {
 		res, ok := <-resChan
 		if !ok {
 			log.Fatal("chan was closed")
@@ -73,6 +63,10 @@ func (b *TreeBuilder) BuildTree(data []*adapter.Adapter, depth ...int) tree.Node
 		if res.Score > bestScore.Score {
 			bestScore = res
 		}
+	}
+	// There is no avaible key
+	if bestScore.Score == -10000 {
+		return b.BuildLeafNode(data)
 	}
 	for i := range data {
 		data[i].AddUsedKey(bestScore.Key)
@@ -95,8 +89,13 @@ func (b *TreeBuilder) BuildTree(data []*adapter.Adapter, depth ...int) tree.Node
 }
 
 func (b *TreeBuilder) ScoreRoutine(data []*adapter.Adapter, key string, resChan chan ScoreEntry) {
-	score := b.ScoreFunc(data, key)
-	resChan <- ScoreEntry{key, score}
+	groupedData := utils.GroupBy(data, key)
+	if len(groupedData) == 1 {
+		resChan <- ScoreEntry{key, -10000}
+	} else {
+		score := b.ScoreFunc(data, key)
+		resChan <- ScoreEntry{key, score}
+	}
 }
 
 func (b *TreeBuilder) BuildTreeRoutine(data []*adapter.Adapter, key string, depth int, resChan chan tree.NodeEntry) {

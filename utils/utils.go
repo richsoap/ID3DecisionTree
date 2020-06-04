@@ -14,7 +14,8 @@ func IG(data []*adapter.Adapter, key string) float64 {
 }
 
 func IGR(data []*adapter.Adapter, key string) float64 {
-	return IG(data, key) / H(data, data[0].Class)
+	//return IG(data, key) / H(data, data[0].Class)
+	return IG(data, key) / H(data, key)
 }
 
 // return bit entropy of specific property
