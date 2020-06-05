@@ -171,15 +171,22 @@ func (s adapterSortInterface) Swap(i, j int) {
 }
 
 func (s adapterSortInterface) Less(i, j int) bool {
-	return s.data[i].Data.CtnData[s.key] < s.data[j].Data.CtnData[s.key]
+	ival, iexisted := s.data[i].Data.CtnData[s.key]
+	jval, jexisted := s.data[j].Data.CtnData[s.key]
+	if iexisted && jexisted {
+		return ival < jval
+	} else {
+		return false
+	}
 }
 
 func MakeAnOrderSlice(data []*Adapter, key string) []AdapterWithOrder {
-	result := make([]AdapterWithOrder, len(data), len(data))
+	var sortInterface adapterSortInterface
+	sortInterface.data = make([]AdapterWithOrder, len(data), len(data))
+	sortInterface.key = key
 	for index := range data {
-		result[index] = AdapterWithOrder{data[index], index}
+		sortInterface.data[index] = AdapterWithOrder{data[index], index}
 	}
-	sortInterface := adapterSortInterface{result, key}
 	sort.Sort(sortInterface)
-	return result
+	return sortInterface.data
 }

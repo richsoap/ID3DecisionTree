@@ -53,6 +53,9 @@ func SprintTreeAsDotFile(node tree.Node, withUID bool) string {
 	if res, ok := SprintLeafNodeAsDotFile(node, withUID); ok {
 		return res
 	}
+	if res, ok := SprintCtnNodeAsDotFile(node, withUID); ok {
+		return res
+	}
 	return fmt.Sprintf("%v Conver Error", node.GetUID())
 }
 
@@ -71,6 +74,24 @@ func SprintJudgeNodeAsDotFile(node tree.Node, withUID bool) (string, bool) {
 		sb.WriteString(fmt.Sprintf(LINK_TEMPLATE_WITHLAB, j.GetUID(), j.Children[key].GetUID(), key))
 		sb.WriteString(SprintTreeAsDotFile(j.Children[key], withUID))
 	}
+	return sb.String(), true
+}
+
+func SprintCtnNodeAsDotFile(node tree.Node, withUID bool) (string, bool) {
+	c, ok := node.(*tree.CtnNode)
+	if !ok {
+		return "", false
+	}
+	var sb strings.Builder
+	if withUID {
+		sb.WriteString(fmt.Sprintf(NODE_TEMPLATE_WITHUID, c.GetUID, c.Key, c.GetUID()))
+	} else {
+		sb.WriteString(fmt.Sprintf(NODE_TEMPLATE, c.GetUID(), c.Key))
+	}
+	sb.WriteString(fmt.Sprintf(LINK_TEMPLATE_WITHLAB, c.GetUID(), c.Children["Left"].GetUID(), fmt.Sprintf("<%v", c.DividValue)))
+	sb.WriteString(SprintTreeAsDotFile(c.Children["Left"], withUID))
+	sb.WriteString(fmt.Sprintf(LINK_TEMPLATE_WITHLAB, c.GetUID(), c.Children["Right"].GetUID(), fmt.Sprintf(">=%v", c.DividValue)))
+	sb.WriteString(SprintTreeAsDotFile(c.Children["Right"], withUID))
 	return sb.String(), true
 }
 

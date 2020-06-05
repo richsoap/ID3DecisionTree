@@ -127,7 +127,7 @@ func (b *TreeBuilder) BuildTree(data []*adapter.Adapter, depth ...int) tree.Node
 		node = tree.MakeCtnNode(ctnBestScore.Key, midVal)
 		group = make(map[string][]*adapter.Adapter)
 		group["Left"] = sortData[:ctnBestScore.Index]
-		group["right"] = sortData[ctnBestScore.Index:]
+		group["Right"] = sortData[ctnBestScore.Index:]
 	}
 	nodeChan := make(chan tree.NodeEntry)
 	defer close(nodeChan)

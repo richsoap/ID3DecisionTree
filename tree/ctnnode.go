@@ -35,6 +35,9 @@ type orderResultEntry struct {
 
 func judgeOrderResult(data []adapter.AdapterWithOrder, node Node, resChan chan orderResultEntry) {
 	inputSlice := make([]*adapter.Adapter, len(data), len(data))
+	for index := range data {
+		inputSlice[index] = data[index].Data
+	}
 	result := node.Judge(inputSlice...)
 	for index := range result {
 		resChan <- orderResultEntry{data[index].Index, result[index]}
@@ -56,6 +59,7 @@ func (c *CtnNode) Judge(data ...*adapter.Adapter) []string {
 	index := findMid(sortSlice, c.Key, c.DividValue)
 	resChan := make(chan orderResultEntry)
 	defer close(resChan)
+	//log.Printf("children size: %v, index %v, data size %v, left data %v, right data %v", len(c.Children), index, len(data), len(data[:index]), len(data[index:]))
 	go judgeOrderResult(sortSlice[:index], c.Children["Left"], resChan)
 	if index < len(data) {
 		go judgeOrderResult(sortSlice[index:], c.Children["Right"], resChan)
